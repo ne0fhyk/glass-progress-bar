@@ -3,6 +3,7 @@ package com.google.glass.widget;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.util.AttributeSet;
@@ -10,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -36,6 +39,7 @@ public class SliderView extends FrameLayout {
 	private boolean sliderShowing = true;
 	private OnAnimateListener mProgressListener;
 	private ViewPropertyAnimator mProgressAnimator;
+    private AnimatorUpdateListener mUpdateListener;
 
 	public SliderView(Context paramContext) {
 		this(paramContext, null);
@@ -200,7 +204,7 @@ public class SliderView extends FrameLayout {
 	}
 
 	public void startProgress(long millis) {
-		startProgress(millis, new AccelerateDecelerateInterpolator());
+		startProgress(millis, new LinearInterpolator());
 	}
 
 	public void startProgress(long paramLong, TimeInterpolator paramTimeInterpolator) {
@@ -211,9 +215,10 @@ public class SliderView extends FrameLayout {
 		localLayoutParams.width = i;
 		localLayoutParams.setMargins(-i, 0, 0, 0);
 		this.slider.setLayoutParams(localLayoutParams);
-		
+
+        mProgressAnimator = this.slider.animate().translationX(i).setDuration(paramLong).setInterpolator(paramTimeInterpolator);
 		if(mProgressListener != null) {
-            mProgressAnimator = this.slider.animate().translationX(i).setDuration(paramLong).setInterpolator(paramTimeInterpolator).setListener(new Animator.AnimatorListener() {
+            mProgressAnimator.setListener(new Animator.AnimatorListener() {
                 @Override
                 public void onAnimationStart(Animator animator) {
                 }
@@ -233,8 +238,8 @@ public class SliderView extends FrameLayout {
                 }
             });
         }
-        else {
-        	mProgressAnimator = this.slider.animate().translationX(i).setDuration(paramLong).setInterpolator(paramTimeInterpolator);
+        if(mUpdateListener != null){
+            mProgressAnimator.setUpdateListener(mUpdateListener);
         }
 	}
 
@@ -245,12 +250,22 @@ public class SliderView extends FrameLayout {
 	}
 
     public void stopProgress() {
+        stopProgress(true);
+    }
+
+    public void stopProgress(boolean hideSlider){
         if(mProgressAnimator != null) {
             mProgressAnimator.cancel();
         }
+
+        if(hideSlider)
         hideSlider(true);
     }
-	
+
+    public void setOnAnimatorUpdateListener(AnimatorUpdateListener listener){
+        mUpdateListener = listener;
+    }
+
 	public void setOnAnimateListener(OnAnimateListener listener) {
 		this.mProgressListener = listener;
 	}

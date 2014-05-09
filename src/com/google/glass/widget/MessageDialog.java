@@ -23,11 +23,11 @@ public final class MessageDialog extends Dialog {
 	private static final int MSG_TEMPORARY_MESSAGE_DONE = 1;
 	private static final int MSG_ON_DONE = 2;
 
-	private static final long EXPANDED_MESSAGE_DURATION = 5000L;
-	private static final long MESSAGE_DURATION = 2500L;
+	private static final long EXPANDED_MESSAGE_DURATION = 2000L;
+	private static final long MESSAGE_DURATION = 1000L;
 	private static final String TAG = MessageDialog.class.getSimpleName();
 	// Shown, when progress bar is switched on.
-	private static final long TEMPORARY_MESSAGE_DURATION = 5000L;
+	private static final long TEMPORARY_MESSAGE_DURATION = 2000L;
 	
 	private final Handler handler = new Handler() {
 		public void handleMessage(Message msg) {
@@ -83,33 +83,15 @@ public final class MessageDialog extends Dialog {
 		gestureDetector.setBaseListener(new GestureDetector.BaseListener() {
 			@Override
 			public boolean onGesture(Gesture gesture) {
-				if (gesture == Gesture.TAP) {
-					MessageDialog.this.dismiss();
-					return true;
-				} else if (gesture == Gesture.TWO_TAP) {
-					// do something on two tap
-					return true;
-				} else if (gesture == Gesture.SWIPE_RIGHT) {
-					// do something on right (forward) swipe
-					return true;
-				} else if (gesture == Gesture.SWIPE_LEFT) {
-					// do something on left (backwards) swipe
-					return true;
-				}
-				return false;
-			}
-		});
-		gestureDetector.setFingerListener(new GestureDetector.FingerListener() {
-			@Override
-			public void onFingerCountChanged(int previousCount, int currentCount) {
+                switch(gesture){
+                    case TAP:
+                        return onConfirm();
 
-			}
-		});
-		gestureDetector.setScrollListener(new GestureDetector.ScrollListener() {
-			@Override
-			public boolean onScroll(float displacement, float delta,
-					float velocity) {
-				// do something on scrolling
+                    case SWIPE_DOWN:
+                        cancel();
+                        return true;
+                }
+
 				return false;
 			}
 		});
